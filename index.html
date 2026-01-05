@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Navon Task – Desktop & Mobile</title>
+  <title>Navon Task</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
@@ -64,7 +64,7 @@ jsPsych.data.addProperties({
   device: IS_MOBILE ? "mobile" : "desktop"
 });
 
-const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxeNwAiyIZQZJ6iMkwZ44yMFJ1H3oT5nUWNjzPUKzMeQFVE7Y3c0-xz6-CGbB63cwg96gTest/exec";
+const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyf-KwRlUHBO_tQs0s22v-v6vlgenblgNYeShLGw5u8UIpUS3b4DBUp28UisJnsh7hO/exec";
 
 const N_TRIALS_GLOBAL = 20;
 const N_TRIALS_LOCAL  = 20;
@@ -226,17 +226,19 @@ timeline.push(
   instructionScreen(`
     <h2>Neivona uzdevums</h2>
     <p>Vēro burtus, kas parādīsies uz ekrāna.</p>
+    <p>Informācijai: tiks parādīti S vai H burti, kas veidoti no maziem S vai H burtiem.</p>
     <p>Spied H, ja redzi H, ja S, tad S.</p>
-    <p>Nospied SPACE vai pogu, lai sāktu.</p>
+    <p>Atbildes jāsniedz ātri, jo limits ir 1,5 sekundes.</p>
+    <p>Ja testu veic datorā, nospied SPACE. Ja testu veic telefonā, spied pogu, lai turpinātu.</p>
   `)
 );
 
 timeline.push(
   instructionScreen(`
     <h2>Globālais bloks</h2>
-    <p>Fokusējies uz LIELAJIEM burtiem.</p>
-    <p>Ignorē mazos burtiņus.</p>
-    <p>Nospied SPACE vai pogu, lai sāktu.</p>
+    <p>Šajā blokā tev jākoncentrējas uz <strong>lielajiem burtiem</strong> ekrānā, kas veidoti no mazajiem burtiem.</p>
+    <p>Ignorē <strong>mazos burtiņus</strong> — tas nozīmē, ka tev jāskatās tikai uz lielajiem burtiem.</p>
+    <p>Lai sāktu: ja testu veic datorā, nospied <strong>SPACE</strong>, ja telefonā — spied pogu.</p>
   `)
 );
 timeline.push(...createTrials("global",N_TRIALS_GLOBAL,"global"));
@@ -244,18 +246,23 @@ timeline.push(...createTrials("global",N_TRIALS_GLOBAL,"global"));
 timeline.push(
   instructionScreen(`
     <h2>Lokālais bloks</h2>
-    <p>Fokusējies uz MAZAJIEM burtiem.</p>
-    <p>Ignorē lielos burtiņus.</p>
-    <p>Nospied SPACE vai pogu, lai sāktu.</p>
+    <p>Šajā blokā tev jākoncentrējas uz <strong>mazajiem burtiem</strong>, no kuriem veidots lielais burts ekrānā.</p>
+    <p>Ignorē <strong>lielos burtiņus</strong> — tas nozīmē, ka tev jāskatās tikai uz mazajiem burtiem.</p>
+    <p>Lai sāktu: ja testu veic datorā, nospied <strong>SPACE</strong>, ja telefonā — spied pogu.</p>
   `)
 );
 timeline.push(...createTrials("local",N_TRIALS_LOCAL,"local"));
 
 timeline.push(
   instructionScreen(`
-    <h2>Mix bloks</h2>
-    <p>↑ – globālais | ↓ – lokālais</p>
-    <p>Nospied SPACE vai pogu, lai sāktu.</p>
+    <h2>Jauktais bloks</h2>
+    <p>Šajā blokā dažreiz tev jākoncentrējas uz <strong>lielajiem burtiem</strong>, dažreiz uz <strong>mazajiem burtiem</strong>.</p>
+    <p>Pirms katra uzdevuma ekrānā parādīsies bultiņa:</p>
+    <ul>
+      <li>↑ — fokusējies uz lielajiem burtiem (globālais uzdevums)</li>
+      <li>↓ — fokusējies uz mazajiem burtiem (lokālais uzdevums)</li>
+    </ul>
+    <p>Lai sāktu: ja testu veic datorā, nospied <strong>SPACE</strong>, ja telefonā — spied pogu.</p>
   `)
 );
 timeline.push(...createTrials("mixed",N_TRIALS_MIXED));
@@ -263,19 +270,45 @@ timeline.push(...createTrials("mixed",N_TRIALS_MIXED));
 timeline.push({
   type: "html-keyboard-response",
   stimulus: function () {
+
     const trials = jsPsych.data.get()
-      .filterCustom(d => d.correct !== undefined);
+      .filterCustom(d =>
+        d.correct !== undefined &&
+        d.block !== undefined
+      );
+
+    function blockAccuracy(blockName) {
+      const blockTrials = trials.filter({ block: blockName });
+      if (blockTrials.count() === 0) return "—";
+      return Math.round(blockTrials.select("correct").mean() * 100) + "%";
+    }
+
+    const globalAcc = blockAccuracy("global");
+    const localAcc  = blockAccuracy("local");
+    const mixedAcc  = blockAccuracy("mixed");
+
+    const meanRT = Math.round(
+      trials.filter({ correct: 1 }).select("rt").mean()
+    );
 
     return `
       <h2>Paldies par dalību!</h2>
-      <p><strong>Precizitāte:</strong> ${Math.round(trials.select("correct").mean()*100)}%</p>
-      <p><strong>Vidējais reakcijas laiks:</strong> ${Math.round(trials.select("rt").mean())} ms</p>
+
+      <h3>Precizitāte pa blokiem</h3>
+      <p><strong>Globālais bloks:</strong> ${globalAcc}</p>
+      <p><strong>Lokālais bloks:</strong> ${localAcc}</p>
+      <p><strong>Jauktais bloks:</strong> ${mixedAcc}</p>
+
+      <p style="margin-top:15px;">
+        <strong>Vidējais reakcijas laiks:</strong> ${meanRT} ms
+      </p>
     `;
   },
   on_load: saveData,
   choices: jsPsych.NO_KEYS,
-  data: {ignore:true}
+  data: { ignore: true }
 });
+
 
 
 jsPsych.init({ timeline });
