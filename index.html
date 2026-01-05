@@ -184,11 +184,17 @@ function createTrials(block_type, n_trials, fixed_task=null){
           button_html: `<button class="jspsych-btn mobile-btn">%choice%</button>`,
           trial_duration: 1500,
           data: {block:block_type,trial:i+1,condition,task,global_letter,local_letter},
-          on_finish:function(data){
-            const correct = (task==="global"?global_letter:local_letter);
-            data.response = data.response===0?"H":"S";
-            data.correct = (data.response===correct)?1:0;
+          on_finish: function(data){
+          const correct = (task==="global" ? global_letter : local_letter);
+          if (data.response === null || data.response === undefined) {
+            data.response = null; 
+            data.correct = 0; 
+          } else {
+            data.response = data.response === 0 ? "H" : "S";
+            data.correct = (data.response === correct) ? 1 : 0;
           }
+        }
+
         }
       : {
           type: "html-keyboard-response",
