@@ -46,11 +46,15 @@
 <script src="https://unpkg.com/jspsych@6.3.1/plugins/jspsych-html-button-response.js"></script>
 
 <script>
+
+
 const IS_MOBILE = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
 
 function generateParticipantID() {
   return "NAVON-" + Math.random().toString(36).substring(2, 8).toUpperCase();
 }
+
 const PARTICIPANT_ID = generateParticipantID();
 const TIMESTAMP = new Date().toISOString();
 
@@ -68,6 +72,7 @@ const N_TRIALS_MIXED  = 40;
 
 const GLOBAL_LETTERS = ["H", "S"];
 const GRID_SIZE = 9;
+
 
 const TEMPLATES = {
   "H":[
@@ -94,12 +99,14 @@ const TEMPLATES = {
   ]
 };
 
+
 function generateNavonHTML(global_letter, local_letter){
   const template = TEMPLATES[global_letter];
   const colors = ["white", "yellow", "cyan", "magenta", "lime"];
   const size = Math.min(window.innerWidth / 12, 28);
 
   let html = '<div style="display:inline-block;">';
+
   for(let r=0;r<GRID_SIZE;r++){
     html += '<div>';
     for(let c=0;c<GRID_SIZE;c++){
@@ -122,6 +129,7 @@ function generateNavonHTML(global_letter, local_letter){
   return html;
 }
 
+
 function instructionScreen(htmlText){
   return IS_MOBILE
     ? {
@@ -138,13 +146,17 @@ function instructionScreen(htmlText){
       };
 }
 
+
 function createTrials(block_type, n_trials, fixed_task=null){
   const trials = [];
+
   for(let i=0;i<n_trials;i++){
+
     let task = fixed_task || (block_type==="mixed" ? (Math.random()<0.5?"global":"local") : fixed_task);
     let condition = Math.random()<0.5 ? "congruent" : "incongruent";
 
     let global_letter, local_letter;
+
     if(condition==="congruent"){
       global_letter = local_letter = GLOBAL_LETTERS[Math.floor(Math.random()*2)];
     } else {
@@ -174,9 +186,8 @@ function createTrials(block_type, n_trials, fixed_task=null){
           data: {block:block_type,trial:i+1,condition,task,global_letter,local_letter},
           on_finish:function(data){
             const correct = (task==="global"?global_letter:local_letter);
-            data.response = data.response===null?"":data.response;
+            data.response = data.response===0?"H":"S";
             data.correct = (data.response===correct)?1:0;
-            if(!data.rt) data.rt = "";
           }
         }
       : {
@@ -187,13 +198,7 @@ function createTrials(block_type, n_trials, fixed_task=null){
           data: {block:block_type,trial:i+1,condition,task,global_letter,local_letter},
           on_finish:function(data){
             const correct = (task==="global"?global_letter:local_letter).toLowerCase();
-            if(data.response === null){
-              data.response = "";
-              data.correct = 0;
-            } else {
-              data.correct = (data.response === correct) ? 1 : 0;
-            }
-            if(!data.rt) data.rt = "";
+            data.correct = data.response===null?0:(data.response===correct?1:0);
           }
         }
     );
@@ -201,23 +206,19 @@ function createTrials(block_type, n_trials, fixed_task=null){
   return trials;
 }
 
-function saveData(){
-  const columns = ["participant_id","timestamp","block","trial","condition","task","global_letter","local_letter","response","correct","rt"];
-  const rows = jsPsych.data.get()
-    .filterCustom(d=>d.block && !d.ignore)
-    .values()
-    .map(r => {
-      let obj = {};
-      columns.forEach(c => obj[c] = r[c] ?? "");
-      return obj;
-    });
 
+function saveData(){
   fetch(GOOGLE_SHEETS_URL,{
     method:"POST",
     headers:{"Content-Type":"text/plain"},
-    body: JSON.stringify(rows)
+    body: JSON.stringify(
+      jsPsych.data.get()
+        .filterCustom(d=>d.block && !d.ignore)
+        .values()
+    )
   });
 }
+
 
 let timeline = [];
 
@@ -266,6 +267,7 @@ timeline.push(...createTrials("mixed",N_TRIALS_MIXED));
 timeline.push({
   type: "html-keyboard-response",
   stimulus: function () {
+
     const trials = jsPsych.data.get()
       .filterCustom(d =>
         d.correct !== undefined &&
@@ -304,7 +306,10 @@ timeline.push({
   data: { ignore: true }
 });
 
+
+
 jsPsych.init({ timeline });
+
 </script>
 </body>
 </html>
