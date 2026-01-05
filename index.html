@@ -225,7 +225,6 @@ let timeline = [];
 timeline.push(
   instructionScreen(`
     <h2>Neivona uzdevums</h2>
-    <p>Vēro burtus, kas parādīsies uz ekrāna.</p>
     <p>Informācijai: tiks parādīti S vai H burti, kas veidoti no maziem S vai H burtiem.</p>
     <p>Spied H, ja redzi H, ja S, tad S.</p>
     <p>Atbildes jāsniedz ātri, jo limits ir 1,5 sekundes.</p>
@@ -236,8 +235,8 @@ timeline.push(
 timeline.push(
   instructionScreen(`
     <h2>Globālais bloks</h2>
-    <p>Šajā blokā tev jākoncentrējas uz <strong>lielajiem burtiem</strong> ekrānā, kas veidoti no mazajiem burtiem.</p>
-    <p>Ignorē <strong>mazos burtiņus</strong> — tas nozīmē, ka tev jāskatās tikai uz lielajiem burtiem.</p>
+    <p>Šajā blokā tev jākoncentrējas uz <strong>lielajiem burtiem</strong></p>
+    <p>Lielais burts veidots no maziem burtiem - ignorē <strong>mazos burtiņus</strong></p>
     <p>Lai sāktu: ja testu veic datorā, nospied <strong>SPACE</strong>, ja telefonā — spied pogu.</p>
   `)
 );
@@ -246,8 +245,8 @@ timeline.push(...createTrials("global",N_TRIALS_GLOBAL,"global"));
 timeline.push(
   instructionScreen(`
     <h2>Lokālais bloks</h2>
-    <p>Šajā blokā tev jākoncentrējas uz <strong>mazajiem burtiem</strong>, no kuriem veidots lielais burts ekrānā.</p>
-    <p>Ignorē <strong>lielos burtiņus</strong> — tas nozīmē, ka tev jāskatās tikai uz mazajiem burtiem.</p>
+    <p>Šajā blokā tev jākoncentrējas uz <strong>mazajiem burtiem</strong>.</p>
+    <p>Mazie burtiņi veido lielo burtu - ignorē <strong>lielo burtu</strong>.</p>
     <p>Lai sāktu: ja testu veic datorā, nospied <strong>SPACE</strong>, ja telefonā — spied pogu.</p>
   `)
 );
